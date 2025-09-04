@@ -8,12 +8,15 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskroutes');
 
 const authMiddleware = require('./middleware/authMiddleware');
+const errorHandler = require('./utils/errorHandler');
+const limiter = require('./utils/limiter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGODB_URI;
 
 app.use(bodyParser.json());
+app.use(limiter);
 
 
 mongoose.connect(MONGO_URI)
@@ -26,6 +29,8 @@ app.use('/api/tasks', taskRoutes);
 app.get('/api/protected', authMiddleware, (req, res) => {
     res.json({ message: 'This is a protected route', user: req.user });
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
